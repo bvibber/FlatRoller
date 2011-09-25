@@ -188,15 +188,14 @@ function GameEngine(canvas) {
             image: 'house',
             radius: 25
         }
-    ];
-    for (var i = 0; i < 10; i++) {
+    ], spawnItem = function() {
         var randomType = objectTypes[Math.floor(Math.random() * objectTypes.length)];
         var randomRadius = (1 + Math.random() * 0.25) * randomType.radius;
         var randomX;
         var areaClear = function() {
             var isClear = true;
             $.each(items, function(i, item) {
-                if (Math.abs(item.x - randomX) < item.radius + randomRadius) {
+                if (Math.abs(item.x - randomX) < 2 * (item.radius + randomRadius)) {
                     isClear = false;
                 }
             });
@@ -204,17 +203,20 @@ function GameEngine(canvas) {
         };
         var max = 10, n = 0;
         do {
-            randomX = Math.random() * width;
+            randomX = Math.random() * width * 3 - width;
             n++;
         } while (!areaClear() && n < max);
-        items.push(new GameObject({
+        return new GameObject({
             x: randomX,
             y: horizon - randomRadius,
             radius: randomRadius,
             image: randomType.image,
             paint: roller.paint,
             tick: roller.tick
-        }));
+        });
+    };
+    for (var i = 0; i < 10; i++) {
+        items.push(spawnItem());
     }
 
     $.extend(this, {
@@ -342,20 +344,34 @@ function GameEngine(canvas) {
          * @param {number} slice: time to calculate updates for, in seconds
          */
         tick: function(slice) {
-            var args = [slice];
+            var args = [slice],
+                dropCount = 0,
+                spawnCount = 0;
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
                 item.tick.apply(item, args);
                 if (item !== roller) {
                     self.rollupCheck(item);
                 }
-            }
-            for (var i = 0; i < items.length; i++) {
-                var item = items[i];
                 if (!item.active) {
-                    items.splice(i, 1);
-                    i--;
+                    dropCount++;
+                    spawnCount++;
                 }
+            }
+
+            // See if we have to remove any items...
+            if (dropCount) {
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+                    if (!item.active) {
+                        items.splice(i, 1);
+                        i--;
+                    }
+                }
+            }
+            while (spawnCount) {
+                items.push(spawnItem());
+                spawnCount--;
             }
             tickCount++;
         },
