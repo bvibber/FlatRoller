@@ -30,7 +30,7 @@ function GameEngine(canvas) {
         lastTickCount = 0,
         lastDebugUpdate = false,
         lastPainted = false,
-        lastTickedPaint = false;
+        lastTicked = false;
 
     var roller = new GameObject({
         x: 100,
@@ -82,13 +82,6 @@ function GameEngine(canvas) {
             // Set up rendering loop!
             this.queueFrame();
 
-            // Set up physics loop!
-            var slice = 1 / 30;
-            window.setInterval(function() {
-                self.tick(slice);
-                tickCount++;
-            }, 1000 * slice);
-
             // Set up input!
             this.keyboard({
                 // Spacebar
@@ -101,7 +94,16 @@ function GameEngine(canvas) {
 
         queueFrame: function() {
             GameEngine.requestAnimationFrame(function(timestamp) {
+                if (lastTicked) {
+                    // Run physics to update positions since last tick
+                    var slice = (timestamp - lastTicked) / 1000;
+                    self.tick(slice);
+                }
+                lastTicked = timestamp;
+
+                // Draw all our goodies
                 self.paint(timestamp);
+
                 if (lastDebugUpdate === false) {
                     lastDebugUpdate = timestamp;
                 } else {
@@ -132,18 +134,9 @@ function GameEngine(canvas) {
             ctx.fillStyle = 'green';
             ctx.fillRect(0, horizon, width, height - horizon);
 
-            var stub = new GameObject,
-                slice = (timestamp - lastTickedPaint) / 1000,
-                args = [slice];
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
-                $.extend(stub, item);
-                
-                if (slice) {
-                    // Partial physics application for smoother view!
-                    stub.tick.apply(stub, args);
-                }
-                item.paint.apply(stub);
+                item.paint.apply(item);
             }
 
             ctx.restore();
@@ -151,15 +144,15 @@ function GameEngine(canvas) {
         },
 
         /**
-         * @param {number} slice: portion of a second to calculate for
+         * @param {number} slice: time to calculate updates for, in seconds
          */
         tick: function(slice) {
-            lastTickedPaint = lastPainted;
             var args = [slice];
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
                 item.tick.apply(item, args);
             }
+            tickCount++;
         },
         
         keyboard: function(map) {
