@@ -20,6 +20,7 @@ function GameEngine(canvas) {
     var self = this,
         pi = Math.PI,
         tau = pi * 2, // http://tauday.com/
+        margin = 0.0001,
         $canvas = $(canvas),
         $debug = $('#debug'),
         width = parseInt($canvas.attr('width')),
@@ -54,7 +55,6 @@ function GameEngine(canvas) {
             ctx.restore();
         },
         tick: function(slice) {
-            var margin = 0.0001;
             if (Math.abs(this.dx) > margin) {
                 this.x += this.dx * slice;
             }
@@ -118,15 +118,24 @@ function GameEngine(canvas) {
             this.queueFrame();
 
             // Set up input!
+            var onGround = function() {
+                return roller.y + roller.radius >= horizon - 2 * margin;
+            }
             this.keyboard({
                 space: function(event) {
-                    roller.dy -= 100;
+                    if (onGround()) {
+                        roller.dy -= 100;
+                    }
                 },
                 left: function(event) {
-                    roller.dx -= 10;
+                    if (onGround()) {
+                        roller.dx -= 10;
+                    }
                 },
                 right: function(event) {
-                    roller.dx += 10;
+                    if (onGround()) {
+                        roller.dx += 10;
+                    }
                 },
             });
         },
