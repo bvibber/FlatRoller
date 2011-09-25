@@ -258,9 +258,8 @@ function GameEngine(canvas) {
             // Set up input!
             var onGround = function() {
                 return roller.y + roller.radius >= horizon - 2 * margin;
-            }
-            this.keyboard({
-                space: function(event) {
+            }, keyMap = {
+                up: function(event) {
                     if (onGround()) {
                         roller.dy -= 100;
                     }
@@ -275,7 +274,9 @@ function GameEngine(canvas) {
                         roller.dx += 10;
                     }
                 },
-            });
+            };
+            keyMap.space = keyMap.up;
+            this.keyboard(keyMap);
         },
 
         queueFrame: function() {
