@@ -197,8 +197,8 @@ function GameEngine(canvas) {
             }
             if ('overlay' in this) {
                 ctx.drawImage(this.overlay,
-                              -this.radius / scalehack, -this.radius / scalehack,
-                              this.radius * 2 / scalehack, this.radius * 2 / scalehack);
+                              -milestone / scalehack, -milestone / scalehack,
+                              milestone * 2 / scalehack, milestone * 2 / scalehack);
             }
             ctx.restore();
         },
@@ -505,20 +505,42 @@ function GameEngine(canvas) {
         },
 
         addToRollup: function(item, oldRadius, newRadius) {
-            var overlay = $('<canvas>').attr('width', 256).attr('height', 256)[0],
+            var overlay, ctx;
+            if (oldRadius < lastMilestone || !roller.overlay) {
+                // Create a fresh overlay image!
+                overlay = $('<canvas>').attr('width', 256).attr('height', 256)[0];
                 ctx = overlay.getContext('2d');
-            ctx.save();
-            ctx.translate(128, 128);
-            ctx.scale(128 / newRadius, 128 / newRadius);
-            ctx.scale(scalehack, scalehack);
 
-            if (roller.overlay) {
-                ctx.save();
-                ctx.drawImage(roller.overlay,
-                              -oldRadius / scalehack, -oldRadius / scalehack,
-                              oldRadius * 2 / scalehack, oldRadius * 2 / scalehack);
-                ctx.restore();
+                // Set initial scale...
+                ctx.translate(128, 128);
+                ctx.scale(128 / milestone, 128 / milestone);
+                ctx.scale(scalehack, scalehack);
+
+                if (roller.overlay) {
+                    // Scale down the previous set of data
+                    ctx.save();
+                    ctx.drawImage(roller.overlay,
+                                  -lastMilestone / scalehack, -lastMilestone / scalehack,
+                                  lastMilestone * 2 / scalehack, lastMilestone * 2 / scalehack);
+                    ctx.restore();
+                }
+                roller.overlay = overlay;
+
+                /**
+                // for debug
+                $('#overlay').remove();
+                $(overlay).attr('id', 'overlay').css({
+                    'z-index': 100,
+                    'position': 'absolute',
+                    'border': 'solid 1px gray'
+                }).appendTo('body');
+                */
+            } else {
+                overlay = roller.overlay;
+                ctx = overlay.getContext('2d');
             }
+
+            ctx.save();
 
             // Correct for the current roller rotation
             ctx.rotate(-roller.theta);
@@ -530,17 +552,6 @@ function GameEngine(canvas) {
                           direction * (newRadius - item.radius * 0.5) - item.radius, -item.radius,
                           item.radius * 2, item.radius * 2);
             ctx.restore();
-            roller.overlay = overlay;
-
-            /**
-            // for debug
-            $('#overlay').remove();
-            $(overlay).attr('id', 'overlay').css({
-                'z-index': 100,
-                'position': 'absolute',
-                'border': 'solid 1px gray'
-            }).appendTo('body');
-            */
         },
 
         keyboard: function(map) {
