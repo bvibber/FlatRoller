@@ -113,13 +113,36 @@ function GameEngine(canvas) {
     var items = [roller];
 
     // Add some junk for us eh?
+    var colors = [
+        'red',
+        'gray',
+        'yellow',
+        'purple',
+        'cyan',
+        'brown'
+    ];
     for (var i = 0; i < 10; i++) {
         var randomRadius = Math.random() * 23 + 2;
+        var randomX;
+        var areaClear = function() {
+            var isClear = true;
+            $.each(items, function(i, item) {
+                if (Math.abs(item.x - randomX) < item.radius + randomRadius) {
+                    isClear = false;
+                }
+            });
+            return isClear;
+        };
+        var max = 10, n = 0;
+        do {
+            randomX = Math.random() * width;
+            n++;
+        } while (!areaClear() && n < max);
         items.push(new GameObject({
-            x: Math.random() * width,
+            x: randomX,
             y: horizon - randomRadius,
             radius: randomRadius,
-            fillStyle: 'gray',
+            fillStyle: colors[Math.floor(Math.random() * colors.length)],
             paint: roller.paint,
             tick: roller.tick
         }));
