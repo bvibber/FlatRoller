@@ -37,11 +37,11 @@ function GameEngine(canvas) {
 
     var roller = new GameObject({
         x: 100,
-        y: horizon - 20,
+        y: height * 0.25,
         radius: 20,
         theta: 0,
         dx: tau * 20,
-        dy: 0,
+        dy: 200,
         dtheta: tau,
         fillStyle: 'white',
         paint: function() {
