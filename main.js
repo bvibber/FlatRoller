@@ -3,11 +3,15 @@
 function GameEngine(canvas) {
     var self = this,
         $canvas = $(canvas),
+        $debug = $('#debug'),
         width = parseInt($canvas.attr('width')),
         height = parseInt($canvas.attr('height')),
         ctx = canvas.getContext('2d'),
         active = false,
-        horizon = Math.round(height * 0.75);
+        horizon = Math.round(height * 0.75),
+        frameCount = 0,
+        lastFrameCount = 0,
+        lastDebugUpdate = false;
 
     $.extend(this, {
         start: function() {
@@ -20,6 +24,19 @@ function GameEngine(canvas) {
         queueFrame: function() {
             GameEngine.requestAnimationFrame(function(timestamp) {
                 self.paint(timestamp);
+                if (lastDebugUpdate === false) {
+                    lastDebugUpdate = timestamp;
+                } else {
+                    var delta = timestamp - lastDebugUpdate;
+                    if (delta >= 1000) {
+                        var fps = Math.round((frameCount - lastFrameCount) / (delta / 1000)),
+                            msg = fps + ' fps; frame ' + frameCount;
+                        $debug.text(msg);
+                        lastDebugUpdate = timestamp;
+                        lastFrameCount = frameCount;
+                    }
+                }
+                frameCount++;
                 if (active) {
                     self.queueFrame();
                 }
