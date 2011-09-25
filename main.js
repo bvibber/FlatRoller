@@ -460,8 +460,8 @@ function GameEngine(canvas) {
                 facing = (roller.dx) / Math.abs(roller.dx),
                 collision = (facing * direction > 0) && (dist <= item.radius + roller.radius + margin);
             if (collision) {
-                if (item.radius + margin >= roller.radius) {
-                    // it's bigger than us! collide?
+                if (item.radius + margin >= 0.75 * roller.radius) {
+                    // it's close or bigger than us! collide?
                     var inertia = roller.mass() * roller.speed(),
                         transfer = inertia * 0.3333 / item.mass(),
                         bounceback = inertia * 0.3333 / roller.mass();
