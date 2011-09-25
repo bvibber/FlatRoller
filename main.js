@@ -1,5 +1,20 @@
 // (c) 2011 Brion Vibber <brion@pobox.com>
 
+function round10(n) {
+    return Math.round(n * 10) / 10;
+}
+
+function triplet(x, y, theta, prefix) {
+    prefix = prefix || '';
+    var items = {
+        'x': x,
+        'y': y,
+        '\u03b8': theta};
+    return $.map(items, function(item, label) {
+        return prefix + label + round10(item);
+    }).join(' ');
+}
+
 function GameObject(props) {
     var defaults = {
         x: 0,
@@ -70,7 +85,9 @@ function GameEngine(canvas) {
             } else if (this.x > width) {
                 this.x -= width;
             }
-            if (this.theta > tau) {
+            if (this.theta < 0) {
+                this.theta += tau;
+            } else if (this.theta > tau) {
                 this.theta -= tau;
             }
 
@@ -83,7 +100,7 @@ function GameEngine(canvas) {
                 // Force rolling to match our speed
                 this.dtheta = (this.dx / this.radius);
 
-                var rollingResistence = 10 * slice;
+                var rollingResistence = 25 * slice;
                 if (this.dx > margin) {
                     this.dx -= rollingResistence;
                 } else if (this.dx < margin) {
@@ -161,7 +178,8 @@ function GameEngine(canvas) {
                             tps = Math.round((tickCount - lastTickCount) / (delta / 1000)),
                             msg = fps + ' fps; frame ' + frameCount + '; ' +
                                   tps + ' tps; tick ' + tickCount + '; ' +
-                                  [roller.dx, roller.dy, roller.dtheta].join(' ');
+                                  triplet(roller.x, roller.y, roller.theta) + '; ' +
+                                  triplet(roller.dx, roller.dy, roller.dtheta, 'd');
                         $debug.text(msg);
                         lastDebugUpdate = timestamp;
                         lastFrameCount = frameCount;
