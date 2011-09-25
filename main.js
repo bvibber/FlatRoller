@@ -100,10 +100,8 @@ function GameEngine(canvas) {
                 // Force rolling to match our speed
                 this.dtheta = (this.dx / this.radius);
 
-                var rollingResistence = 25 * slice;
-                if (this.dx > margin) {
-                    this.dx -= rollingResistence;
-                } else if (this.dx < margin) {
+                var rollingResistence = -0.25 * this.dx * slice;
+                if (Math.abs(rollingResistence) > margin) {
                     this.dx += rollingResistence;
                 }
             } else {
@@ -133,6 +131,19 @@ function GameEngine(canvas) {
 
             // Set up rendering loop!
             this.queueFrame();
+            
+            // Set up backup timer to update physics when not drawing
+            window.setInterval(function() {
+                if (lastTicked) {
+                    var timestamp = (new Date).getTime();
+                    if (timestamp - lastTicked > 100) {
+                        // Been a while since our last hit!
+                        // whinge
+                        console.log((timestamp - lastTicked) + 'ms since our last tick; forcing');
+                        self.tickTo(timestamp);
+                    }
+                }
+            }, 100);
 
             // Set up input!
             var onGround = function() {
@@ -159,12 +170,7 @@ function GameEngine(canvas) {
 
         queueFrame: function() {
             GameEngine.requestAnimationFrame(function(timestamp) {
-                if (lastTicked) {
-                    // Run physics to update positions since last tick
-                    var slice = (timestamp - lastTicked) / 1000;
-                    self.tick(slice);
-                }
-                lastTicked = timestamp;
+                self.tickTo(timestamp);
 
                 // Draw all our goodies
                 self.paint(timestamp);
@@ -209,6 +215,16 @@ function GameEngine(canvas) {
 
             ctx.restore();
             lastPainted = timestamp;
+        },
+
+        tickTo: function(timestamp) {
+            if (lastTicked) {
+                // Run physics to update positions since last tick
+                var delta = (timestamp - lastTicked),
+                    slice = delta / 1000;
+                self.tick(slice);
+            }
+            lastTicked = timestamp;
         },
 
         /**
