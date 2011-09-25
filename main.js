@@ -1,16 +1,19 @@
 // (c) 2011 Brion Vibber <brion@pobox.com>
 
 function GameObject(props) {
-    $.extend({
+    var defaults = {
         x: 0,
         y: 0,
         radius: 1,
+        theta: 0,
         dx: 0,
         dy: 0,
+        dtheta: 0,
         paint: null,
         tick: null
-    }, props);
-    $.extend(this, props);
+    };
+    $.extend(defaults, props);
+    $.extend(this, defaults);
 }
 
 function GameEngine(canvas) {
@@ -40,9 +43,10 @@ function GameEngine(canvas) {
         dx: tau * 20,
         dy: 0,
         dtheta: tau,
+        fillStyle: 'white',
         paint: function() {
             ctx.save();
-            ctx.fillStyle = 'white';
+            ctx.fillStyle = this.fillStyle;
             ctx.translate(this.x, this.y);
             ctx.rotate(this.theta);
             ctx.fillRect(-this.radius, -this.radius,
@@ -74,6 +78,20 @@ function GameEngine(canvas) {
         }
     });
     var items = [roller];
+
+    // Add some junk for us eh?
+    for (var i = 0; i < 10; i++) {
+        var randomRadius = Math.random() * 23 + 2;
+        items.push(new GameObject({
+            x: Math.random() * width,
+            y: horizon - randomRadius,
+            radius: randomRadius,
+            fillStyle: 'gray',
+            paint: roller.paint,
+            tick: roller.tick
+        }));
+        console.log(items[items.length - 1]);
+    }
 
     $.extend(this, {
         start: function() {
