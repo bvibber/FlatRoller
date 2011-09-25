@@ -1,7 +1,21 @@
 // (c) 2011 Brion Vibber <brion@pobox.com>
 
+function GameObject(props) {
+    $.extend({
+        x: 0,
+        y: 0,
+        radius: 1,
+        dx: 0,
+        dy: 0,
+        paint: null
+    }, props);
+    $.extend(this, props);
+}
+
 function GameEngine(canvas) {
     var self = this,
+        pi = Math.PI,
+        tau = pi * 2, // http://tauday.com/
         $canvas = $(canvas),
         $debug = $('#debug'),
         width = parseInt($canvas.attr('width')),
@@ -11,7 +25,29 @@ function GameEngine(canvas) {
         horizon = Math.round(height * 0.75),
         frameCount = 0,
         lastFrameCount = 0,
+        tickCount = 0,
+        lastTickCount = 0,
         lastDebugUpdate = false;
+
+    var roller = new GameObject({
+        x: 100,
+        y: horizon - 20,
+        radius: 20,
+        theta: 0,
+        dx: tau * 20,
+        dy: 0,
+        dtheta: tau,
+        paint: function() {
+            ctx.save();
+            ctx.fillStyle = 'white';
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.theta);
+            ctx.fillRect(-this.radius, -this.radius,
+                         this.radius * 2, this.radius * 2);
+            ctx.restore();
+        }
+    });
+    var items = [roller];
 
     $.extend(this, {
         start: function() {
@@ -19,6 +55,13 @@ function GameEngine(canvas) {
 
             // Set up rendering loop!
             this.queueFrame();
+            
+            // Set up physics loop!
+            var slice = 0.05;
+            window.setInterval(function() {
+                self.tick(slice);
+                tickCount++;
+            }, 1000 * slice);
         },
 
         queueFrame: function() {
@@ -30,10 +73,12 @@ function GameEngine(canvas) {
                     var delta = timestamp - lastDebugUpdate;
                     if (delta >= 1000) {
                         var fps = Math.round((frameCount - lastFrameCount) / (delta / 1000)),
-                            msg = fps + ' fps; frame ' + frameCount;
+                            tps = Math.round((tickCount - lastTickCount) / (delta / 1000)),
+                            msg = fps + ' fps; frame ' + frameCount + '; ' + tps + ' tps; tick ' + tickCount;
                         $debug.text(msg);
                         lastDebugUpdate = timestamp;
                         lastFrameCount = frameCount;
+                        lastTickCount = tickCount;
                     }
                 }
                 frameCount++;
@@ -50,15 +95,34 @@ function GameEngine(canvas) {
             ctx.fillRect(0, 0, width, horizon);
             
             ctx.fillStyle = 'green';
-            ctx.fillRect(0, horizon, width, height);
+            ctx.fillRect(0, horizon, width, height - horizon);
 
-            ctx.fillStyle = "white";
-            var x = Math.random() * width,
-                y = Math.random() * height;
-            ctx.fillRect(x, y, x + 20, y + 20);
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                item.paint.apply(item);
+            }
 
             ctx.restore();
-        }
+        },
+
+        /**
+         * @param {number} slice: portion of a second to calculate for
+         */
+        tick: function(slice) {
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                item.x += item.dx * slice;
+                item.y += item.dy * slice;
+                item.theta += item.dtheta * slice;
+                
+                while (item.x > width) {
+                    item.x -= width;
+                }
+                while (item.theta > tau) {
+                    item.theta -= tau;
+                }
+            }
+        },
     });
 }
 
