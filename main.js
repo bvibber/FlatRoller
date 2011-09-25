@@ -126,15 +126,25 @@ function GameEngine(canvas) {
     });
 }
 
+
 $.extend(GameEngine, {
     /**
      * Schedule an animation update...
      */
-    requestAnimationFrame: function(callback) {
+    requestAnimationFrame: (function() {
         // https://developer.mozilla.org/en/DOM/window.mozRequestAnimationFrame
-        // @todo use multiple versions and fallbacks
-        window.mozRequestAnimationFrame(callback);
-    }
+        if ('requestAnimationFrame' in window) {
+            return window.requestAnimationFrame.bind(window);
+        } else if ('mozRequestAnimationFrame' in window) {
+            return window.mozRequestAnimationFrame.bind(window);
+        } else if ('webkitRequestAnimationFrame' in window) {
+            return window.webkitRequestAnimationFrame.bind(window);
+        } else {
+            return function() {
+                alert('no requestAnimationFrame support');
+            }
+        }
+    })()
 });
 
 
