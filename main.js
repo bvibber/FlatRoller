@@ -102,14 +102,17 @@ function GameEngine(canvas) {
         lastTickCount = 0,
         lastDebugUpdate = false,
         lastPainted = false,
-        lastTicked = false;
+        lastTicked = false,
+        scale = 2,
+        initialRadius = 20,
+        milestone = initialRadius * 1.5;
 
     var roller = new GameObject({
         x: 100,
         y: height * -0.25,
-        radius: 20,
+        radius: initialRadius,
         theta: 0,
-        dx: tau * 20,
+        dx: tau * initialRadius,
         dy: 200,
         dtheta: pi,
         fillStyle: 'white',
@@ -272,6 +275,12 @@ function GameEngine(canvas) {
                         roller.dx += 10;
                     }
                 },
+                a: function(event) {
+                    scale = scale * 1.1;
+                },
+                z: function(event) {
+                    scale = scale / 1.1;
+                }
             };
             keyMap.space = keyMap.up;
             this.keyboard(keyMap);
@@ -317,8 +326,12 @@ function GameEngine(canvas) {
             ctx.fillStyle = 'green';
             ctx.fillRect(0, horizon, width, height - horizon);
 
+            // Scale & position horizon
+            ctx.translate(width / 2, horizon);
+            ctx.scale(scale, scale);
+            ctx.translate(-roller.x, 0);
+
             // Center the view on our roller
-            ctx.translate(width / 2 -roller.x, horizon);
 
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
@@ -386,6 +399,10 @@ function GameEngine(canvas) {
                 } else {
                     // it's smaller than us! swallow it
                     roller.radius = Math.sqrt((roller.area() + item.area()) / tau);
+                    if (roller.radius >= milestone) {
+                        milestone *= 1.5;
+                        scale /= 1.5;
+                    }
                     item.active = false;
                 }
             }
@@ -397,7 +414,9 @@ function GameEngine(canvas) {
                 left: 37,
                 up: 38,
                 right: 39,
-                down: 40
+                down: 40,
+                a: 65,
+                z: 90
             };
             var keyMap = {};
             $. map(map, function(callback, keyName) {
