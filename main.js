@@ -106,7 +106,7 @@ function GameEngine(canvas) {
 
     var roller = new GameObject({
         x: 100,
-        y: height * 0.25,
+        y: height * -0.25,
         radius: 20,
         theta: 0,
         dx: tau * 20,
@@ -153,7 +153,7 @@ function GameEngine(canvas) {
                 this.theta -= tau;
             }
 
-            var cutoff = horizon - this.radius;
+            var cutoff = -this.radius;
             if (this.y >= (cutoff - margin)) {
                 this.y = cutoff;
                 this.dy = 0;
@@ -208,7 +208,7 @@ function GameEngine(canvas) {
         } while (!areaClear() && n < max);
         return new GameObject({
             x: randomX,
-            y: horizon - randomRadius,
+            y: -randomRadius,
             radius: randomRadius,
             image: randomType.image,
             paint: roller.paint,
@@ -248,8 +248,6 @@ function GameEngine(canvas) {
                     var timestamp = (new Date).getTime();
                     if (timestamp - lastTicked > 100) {
                         // Been a while since our last hit!
-                        // whinge
-                        console.log((timestamp - lastTicked) + 'ms since our last tick; forcing');
                         self.tickTo(timestamp);
                     }
                 }
@@ -257,7 +255,7 @@ function GameEngine(canvas) {
 
             // Set up input!
             var onGround = function() {
-                return roller.y + roller.radius >= horizon - 2 * margin;
+                return roller.y + roller.radius > -2 * margin;
             }, keyMap = {
                 up: function(event) {
                     if (onGround()) {
@@ -320,7 +318,7 @@ function GameEngine(canvas) {
             ctx.fillRect(0, horizon, width, height - horizon);
 
             // Center the view on our roller
-            ctx.translate(width / 2 -roller.x, 0);
+            ctx.translate(width / 2 -roller.x, horizon);
 
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
