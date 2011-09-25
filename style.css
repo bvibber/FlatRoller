@@ -1,6 +1,14 @@
-html, body {
+body {
     background: black;
     color: white;
+}
+
+#all {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
 #ui {
@@ -11,4 +19,20 @@ html, body {
 }
 
 #game {
+}
+
+#touch-left,
+#touch-right {
+    position: absolute;
+    top: 40px;
+    bottom: 40px;
+    width: 192px;
+}
+#touch-left {
+    left: 0px;
+    background: rgb(24, 0, 0);
+}
+#touch-right {
+    right: 0px;
+    background: rgb(24, 24, 0);
 }

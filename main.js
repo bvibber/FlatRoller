@@ -311,6 +311,37 @@ function GameEngine(canvas) {
             };
             keyMap.space = keyMap.up;
             this.keyboard(keyMap);
+
+            // Set up touch input for iPad etc
+            if (true) {
+                var repeatDelay = 100;
+                var dirKeysDownCount = 0;
+                var touchableArea = function(target, callback) {
+                    var interval;
+                    $(target).bind('touchstart', function(event) {
+                        event.preventDefault();
+                        if (!interval) {
+                            if (dirKeysDownCount) {
+                                // Already holding the other button.
+                                // Trigger a jump!
+                                keyMap.up();
+                            }
+                            dirKeysDownCount++;
+                            keyMap.right();
+                            interval = window.setInterval(callback, repeatDelay);
+                        }
+                    }).bind('touchend', function(event) {
+                        event.preventDefault();
+                        if (interval) {
+                            dirKeysDownCount--;
+                            window.clearInterval(interval);
+                            interval = null;
+                        }
+                    });
+                };
+                touchableArea('#touch-left', keyMap.left);
+                touchableArea('#touch-right', keyMap.right);
+            }
         },
 
         queueFrame: function() {
