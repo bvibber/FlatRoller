@@ -15,6 +15,48 @@ function triplet(x, y, theta, prefix) {
     }).join(' ');
 }
 
+function ImageLibrary(options) {
+    var self = this,
+        base = options.base || window.location.toString().replace(/\/([^\/])$/, ''),
+        names = options.names || [],
+        loadCallback = options.load || null
+        imageUrl = function(name) {
+            return base + '/' + name + '.png';
+        },
+        imageLoadCount = 0,
+        pushImageLoad = function() {
+            imageLoadCount++;
+        },
+        popImageLoad = function() {
+            imageLoadCount--;
+            if (imageLoadCount == 0) {
+                loadCallback.apply(self, [self.images]);
+            }
+        }
+    ;
+    $.extend(this, {
+        images: {},
+        load: function(callback) {
+            if (callback) {
+                loadCallback = callback;
+            }
+            $.each(names, function(i, name) {
+                var image = new Image();
+                image.src = imageUrl(name);
+                self.images[name] = image;
+                pushImageLoad();
+                $(image)
+                    .load(popImageLoad)
+                    .error(function(event) {
+                        console.log('error?', event);
+                        popImageLoad();
+                    });
+            });
+            return self;
+        }
+    });
+}
+
 function GameObject(props) {
     var defaults = {
         x: 0,
@@ -60,13 +102,22 @@ function GameEngine(canvas) {
         dy: 200,
         dtheta: pi,
         fillStyle: 'white',
+        image: 'roller',
         paint: function() {
             ctx.save();
-            ctx.fillStyle = this.fillStyle;
             ctx.translate(this.x, this.y);
             ctx.rotate(this.theta);
-            ctx.fillRect(-this.radius, -this.radius,
-                         this.radius * 2, this.radius * 2);
+            if ('image' in this) {
+                ctx.drawImage(images[this.image],
+                              -this.radius, -this.radius,
+                              this.radius * 2, this.radius * 2);
+            } else {
+                if ('fillStyle' in this) {
+                    ctx.fillStyle = this.fillStyle;
+                }
+                ctx.fillRect(-this.radius, -this.radius,
+                             this.radius * 2, this.radius * 2);
+            }
             ctx.restore();
         },
         tick: function(slice) {
@@ -113,16 +164,23 @@ function GameEngine(canvas) {
     var items = [roller];
 
     // Add some junk for us eh?
-    var colors = [
-        'red',
-        'gray',
-        'yellow',
-        'purple',
-        'cyan',
-        'brown'
+    var objectTypes = [
+        {
+            image: 'car',
+            radius: 10
+        },
+        {
+            image: 'tree',
+            radius: 15
+        },
+        {
+            image: 'house',
+            radius: 25
+        }
     ];
     for (var i = 0; i < 10; i++) {
-        var randomRadius = Math.random() * 23 + 2;
+        var randomType = objectTypes[Math.floor(Math.random() * objectTypes.length)];
+        var randomRadius = (1 + Math.random() * 0.25) * randomType.radius;
         var randomX;
         var areaClear = function() {
             var isClear = true;
@@ -142,13 +200,29 @@ function GameEngine(canvas) {
             x: randomX,
             y: horizon - randomRadius,
             radius: randomRadius,
-            fillStyle: colors[Math.floor(Math.random() * colors.length)],
+            image: randomType.image,
             paint: roller.paint,
             tick: roller.tick
         }));
     }
 
     $.extend(this, {
+        init: function() {
+            var lib = new ImageLibrary({
+                base: 'images',
+                names: [
+                    'roller',
+                    'car',
+                    'tree',
+                    'house'
+                ]
+            });
+            lib.load(function() {
+                images = this.images;
+                self.start();
+            });
+        },
+
         start: function() {
             active = true;
 
@@ -311,5 +385,5 @@ $.extend(GameEngine, {
 
 $(function() {
     var engine = new GameEngine(document.getElementById('game'));
-    engine.start();
+    engine.init();
 });
