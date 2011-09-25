@@ -53,12 +53,23 @@ function GameEngine(canvas) {
             this.x += this.dx * slice;
             this.y += this.dy * slice;
             this.theta += this.dtheta * slice;
-            
+
             if (this.x > width) {
                 this.x -= width;
             }
             if (this.theta > tau) {
                 this.theta -= tau;
+            }
+
+            var cutoff = horizon - this.radius;
+            if (this.y == cutoff) {
+                // sittin' still!
+            } else if (this.y > cutoff) {
+                this.y = cutoff;
+                this.dy = 0;
+            } else {
+                // Apply gravity
+                this.dy += (100 * slice);
             }
         }
     });
@@ -70,13 +81,22 @@ function GameEngine(canvas) {
 
             // Set up rendering loop!
             this.queueFrame();
-            
+
             // Set up physics loop!
             var slice = 1 / 30;
             window.setInterval(function() {
                 self.tick(slice);
                 tickCount++;
             }, 1000 * slice);
+
+            // Set up input!
+            this.keyboard({
+                // Spacebar
+                32: function(event) {
+                    // @todo reify the simulation time?
+                    roller.dy -= 100;
+                },
+            });
         },
 
         queueFrame: function() {
@@ -141,6 +161,15 @@ function GameEngine(canvas) {
                 item.tick.apply(item, args);
             }
         },
+        
+        keyboard: function(map) {
+            $(window).keydown(function(event) {
+                if (event.keyCode in map) {
+                    map[event.keyCode].apply(self, [event]);
+                    event.preventDefault();
+                }
+            });
+        }
     });
 }
 
