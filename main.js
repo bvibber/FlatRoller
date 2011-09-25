@@ -112,22 +112,14 @@ function GameEngine(canvas) {
         milestone = initialRadius * 1.5,
         scalehack = 0.75; // for the rollup image, needs to be bigger than the raw roller
 
-    var roller = new GameObject({
-        x: 100,
-        y: height * -0.25,
-        radius: initialRadius,
-        theta: 0,
-        dx: tau * initialRadius,
-        dy: 200,
-        dtheta: pi,
-        fillStyle: 'white',
-        image: 'roller',
-        paint: function() {
+    // Standard behavior for most game objects
+    var objectTemplate = {
+        paint: function(ctx) {
             ctx.save();
             ctx.translate(this.x, this.y);
             ctx.rotate(this.theta);
             if ('image' in this) {
-                var r = (this.image == 'roller') ? lastMilestone : this.radius;
+                var r = this.radius;
                 ctx.drawImage(images[this.image],
                               -r, -r,
                               r * 2, r * 2);
@@ -138,13 +130,9 @@ function GameEngine(canvas) {
                 ctx.fillRect(-this.radius, -this.radius,
                              this.radius * 2, this.radius * 2);
             }
-            if ('overlay' in this) {
-                ctx.drawImage(this.overlay,
-                              -this.radius / scalehack, -this.radius / scalehack,
-                              this.radius * 2 / scalehack, this.radius * 2 / scalehack);
-            }
             ctx.restore();
         },
+
         tick: function(slice) {
             if (Math.abs(this.dx) > margin) {
                 this.x += this.dx * slice;
@@ -185,6 +173,36 @@ function GameEngine(canvas) {
                 this.dy += (100 * slice);
             }
         }
+    };
+
+    var roller = new GameObject({
+        x: 100,
+        y: height * -0.25,
+        radius: initialRadius,
+        theta: 0,
+        dx: tau * initialRadius,
+        dy: 200,
+        dtheta: pi,
+        fillStyle: 'white',
+        image: 'roller',
+        paint: function(ctx) {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.theta);
+            if ('image' in this) {
+                var r = lastMilestone;
+                ctx.drawImage(images[this.image],
+                              -r, -r,
+                              r * 2, r * 2);
+            }
+            if ('overlay' in this) {
+                ctx.drawImage(this.overlay,
+                              -this.radius / scalehack, -this.radius / scalehack,
+                              this.radius * 2 / scalehack, this.radius * 2 / scalehack);
+            }
+            ctx.restore();
+        },
+        tick: objectTemplate.tick
     });
     var items = [roller];
 
@@ -241,14 +259,15 @@ function GameEngine(canvas) {
             randomX = Math.random() * width * 3 - width;
             n++;
         } while (!areaClear() && n < max);
-        return new GameObject({
+        
+        var props = $.extend({}, objectTemplate);
+        $.extend(props, {
             x: randomX,
             y: -randomRadius,
             radius: randomRadius,
-            image: randomType.image,
-            paint: roller.paint,
-            tick: roller.tick
+            image: randomType.image
         });
+        return new GameObject(props);
     };
     for (var i = 0; i < 10; i++) {
         items.push(spawnItem());
@@ -396,13 +415,13 @@ function GameEngine(canvas) {
             // Scale & position horizon
             ctx.translate(width / 2, horizon);
             ctx.scale(scale, scale);
+            // Center the view on our roller
             ctx.translate(-roller.x, 0);
 
-            // Center the view on our roller
-
+            var args = [ctx];
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
-                item.paint.apply(item);
+                item.paint.apply(item, args);
             }
 
             ctx.restore();
