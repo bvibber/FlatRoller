@@ -574,18 +574,17 @@ $.extend(GameEngine, {
      */
     requestAnimationFrame: (function() {
         // https://developer.mozilla.org/en/DOM/window.mozRequestAnimationFrame
-        if ('requestAnimationFrame' in window) {
-            return window.requestAnimationFrame.bind(window);
-        } else if ('mozRequestAnimationFrame' in window) {
-            return window.mozRequestAnimationFrame.bind(window);
-        } else if ('webkitRequestAnimationFrame' in window) {
-            return window.webkitRequestAnimationFrame.bind(window);
-        } else if ('oRequestAnimationFrame' in window) {
-            return window.oRequestAnimationFrame.bind(window);
-        } else if ('msRequestAnimationFrame' in window) {
-            return window.msRequestAnimationFrame.bind(window);
+        var func = window.requestAnimationFrame
+            || window.mozRequestAnimationFrame
+            || window.webkitRequestAnimationFrame
+            || window.oRequestAnimationFrame
+            || window.msRequestAnimationFrame
+            || undefined;
+        if (func) {
+            GameEngine.frameStyle = 'requestAnimationFrame';
+            return func.bind(window);
         } else {
-            // ewwww!
+            GameEngine.frameStyle = 'setTimeout';
             return function(callback) {
                 var idealDelay = 1000 / 60;
                 window.setTimeout(function() {
