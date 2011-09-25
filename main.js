@@ -261,7 +261,7 @@ function GameEngine(canvas) {
             }, keyMap = {
                 up: function(event) {
                     if (onGround()) {
-                        roller.dy -= 100;
+                        roller.dy -= Math.sqrt(roller.radius) * 20;
                     }
                 },
                 left: function(event) {
