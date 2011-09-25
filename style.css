@@ -4,8 +4,12 @@ body {
     color: white;
 }
 
-#game {
+#ui {
     margin-top: 100px;
+    width: 640px;
     margin-left: auto;
     margin-right: auto;
+}
+
+#game {
 }
