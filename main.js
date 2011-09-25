@@ -7,7 +7,8 @@ function GameObject(props) {
         radius: 1,
         dx: 0,
         dy: 0,
-        paint: null
+        paint: null,
+        tick: null
     }, props);
     $.extend(this, props);
 }
@@ -27,7 +28,9 @@ function GameEngine(canvas) {
         lastFrameCount = 0,
         tickCount = 0,
         lastTickCount = 0,
-        lastDebugUpdate = false;
+        lastDebugUpdate = false,
+        lastPainted = false,
+        lastTickedPaint = false;
 
     var roller = new GameObject({
         x: 100,
@@ -45,6 +48,18 @@ function GameEngine(canvas) {
             ctx.fillRect(-this.radius, -this.radius,
                          this.radius * 2, this.radius * 2);
             ctx.restore();
+        },
+        tick: function(slice) {
+            this.x += this.dx * slice;
+            this.y += this.dy * slice;
+            this.theta += this.dtheta * slice;
+            
+            if (this.x > width) {
+                this.x -= width;
+            }
+            if (this.theta > tau) {
+                this.theta -= tau;
+            }
         }
     });
     var items = [roller];
@@ -57,7 +72,7 @@ function GameEngine(canvas) {
             this.queueFrame();
             
             // Set up physics loop!
-            var slice = 0.05;
+            var slice = 1 / 30;
             window.setInterval(function() {
                 self.tick(slice);
                 tickCount++;
@@ -97,30 +112,33 @@ function GameEngine(canvas) {
             ctx.fillStyle = 'green';
             ctx.fillRect(0, horizon, width, height - horizon);
 
+            var stub = new GameObject,
+                slice = (timestamp - lastTickedPaint) / 1000,
+                args = [slice];
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
-                item.paint.apply(item);
+                $.extend(stub, item);
+                
+                if (slice) {
+                    // Partial physics application for smoother view!
+                    stub.tick.apply(stub, args);
+                }
+                item.paint.apply(stub);
             }
 
             ctx.restore();
+            lastPainted = timestamp;
         },
 
         /**
          * @param {number} slice: portion of a second to calculate for
          */
         tick: function(slice) {
+            lastTickedPaint = lastPainted;
+            var args = [slice];
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
-                item.x += item.dx * slice;
-                item.y += item.dy * slice;
-                item.theta += item.dtheta * slice;
-                
-                while (item.x > width) {
-                    item.x -= width;
-                }
-                while (item.theta > tau) {
-                    item.theta -= tau;
-                }
+                item.tick.apply(item, args);
             }
         },
     });
