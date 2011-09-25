@@ -80,10 +80,10 @@ function GameEngine(canvas) {
                 this.theta += this.dtheta * slice;
             }
 
-            if (this.x < 0) {
-                this.x += width;
-            } else if (this.x > width) {
-                this.x -= width;
+            if (this.x < -width) {
+                this.x += 3 * width;
+            } else if (this.x > 2 * width) {
+                this.x -= 3 * width;
             }
             if (this.theta < 0) {
                 this.theta += tau;
@@ -230,6 +230,9 @@ function GameEngine(canvas) {
             
             ctx.fillStyle = 'green';
             ctx.fillRect(0, horizon, width, height - horizon);
+
+            // Center the view on our roller
+            ctx.translate(width / 2 -roller.x, 0);
 
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
