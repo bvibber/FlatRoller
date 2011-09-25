@@ -42,7 +42,7 @@ function GameEngine(canvas) {
         theta: 0,
         dx: tau * 20,
         dy: 200,
-        dtheta: tau,
+        dtheta: pi,
         fillStyle: 'white',
         paint: function() {
             ctx.save();
@@ -58,7 +58,9 @@ function GameEngine(canvas) {
             this.y += this.dy * slice;
             this.theta += this.dtheta * slice;
 
-            if (this.x > width) {
+            if (this.x < 0) {
+                this.x -= width;
+            } else if (this.x > width) {
                 this.x -= width;
             }
             if (this.theta > tau) {
@@ -66,11 +68,12 @@ function GameEngine(canvas) {
             }
 
             var cutoff = horizon - this.radius;
-            if (this.y == cutoff) {
-                // sittin' still!
-            } else if (this.y > cutoff) {
+            if (this.y >= cutoff) {
                 this.y = cutoff;
                 this.dy = 0;
+
+                // Force rolling to match our speed
+                this.dtheta = (this.dx / this.radius);
             } else {
                 // Apply gravity
                 this.dy += (100 * slice);
@@ -181,7 +184,7 @@ function GameEngine(canvas) {
                 space: 32,
                 left: 37,
                 up: 38,
-                left: 39,
+                right: 39,
                 down: 40
             };
             var keyMap = {};
