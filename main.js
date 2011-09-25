@@ -363,11 +363,12 @@ function GameEngine(canvas) {
                     var delta = timestamp - lastDebugUpdate;
                     if (delta >= 1000) {
                         var fps = Math.round((frameCount - lastFrameCount) / (delta / 1000)),
-                            tps = Math.round((tickCount - lastTickCount) / (delta / 1000)),
-                            msg = fps + ' fps; frame ' + frameCount + '; ' +
-                                  tps + ' tps; tick ' + tickCount + '; ' +
-                                  triplet(roller.x, roller.y, roller.theta) + '; ' +
-                                  triplet(roller.dx, roller.dy, roller.dtheta, 'd');
+                            //tps = Math.round((tickCount - lastTickCount) / (delta / 1000)),
+                            msg = fps + ' fps';
+                                  //'; frame ' + frameCount;
+                                  //tps + ' tps; tick ' + tickCount + '; ' +
+                                  //triplet(roller.x, roller.y, roller.theta) + '; ' +
+                                  //triplet(roller.dx, roller.dy, roller.dtheta, 'd');
                         $debug.text(msg);
                         lastDebugUpdate = timestamp;
                         lastFrameCount = frameCount;
