@@ -54,12 +54,19 @@ function GameEngine(canvas) {
             ctx.restore();
         },
         tick: function(slice) {
-            this.x += this.dx * slice;
-            this.y += this.dy * slice;
-            this.theta += this.dtheta * slice;
+            var margin = 0.0001;
+            if (Math.abs(this.dx) > margin) {
+                this.x += this.dx * slice;
+            }
+            if (Math.abs(this.dx) > margin) {
+                this.y += this.dy * slice;
+            }
+            if (Math.abs(this.dtheta) > margin) {
+                this.theta += this.dtheta * slice;
+            }
 
             if (this.x < 0) {
-                this.x -= width;
+                this.x += width;
             } else if (this.x > width) {
                 this.x -= width;
             }
@@ -68,12 +75,20 @@ function GameEngine(canvas) {
             }
 
             var cutoff = horizon - this.radius;
-            if (this.y >= cutoff) {
+            if (this.y >= (cutoff - margin)) {
                 this.y = cutoff;
                 this.dy = 0;
-
+            }
+            if (this.y >= (cutoff - margin * 2)) {
                 // Force rolling to match our speed
                 this.dtheta = (this.dx / this.radius);
+
+                var rollingResistence = 10 * slice;
+                if (this.dx > margin) {
+                    this.dx -= rollingResistence;
+                } else if (this.dx < margin) {
+                    this.dx += rollingResistence;
+                }
             } else {
                 // Apply gravity
                 this.dy += (100 * slice);
@@ -135,7 +150,9 @@ function GameEngine(canvas) {
                     if (delta >= 1000) {
                         var fps = Math.round((frameCount - lastFrameCount) / (delta / 1000)),
                             tps = Math.round((tickCount - lastTickCount) / (delta / 1000)),
-                            msg = fps + ' fps; frame ' + frameCount + '; ' + tps + ' tps; tick ' + tickCount;
+                            msg = fps + ' fps; frame ' + frameCount + '; ' +
+                                  tps + ' tps; tick ' + tickCount + '; ' +
+                                  [roller.dx, roller.dy, roller.dtheta].join(' ');
                         $debug.text(msg);
                         lastDebugUpdate = timestamp;
                         lastFrameCount = frameCount;
