@@ -108,6 +108,7 @@ function GameEngine(canvas) {
         lastTicked = false,
         scale = 4,
         initialRadius = 10,
+        lastMilestone = initialRadius,
         milestone = initialRadius * 1.5,
         scalehack = 0.75; // for the rollup image, needs to be bigger than the raw roller
 
@@ -126,9 +127,10 @@ function GameEngine(canvas) {
             ctx.translate(this.x, this.y);
             ctx.rotate(this.theta);
             if ('image' in this) {
+                var r = (this.image == 'roller') ? lastMilestone : this.radius;
                 ctx.drawImage(images[this.image],
-                              -this.radius, -this.radius,
-                              this.radius * 2, this.radius * 2);
+                              -r, -r,
+                              r * 2, r * 2);
             } else {
                 if ('fillStyle' in this) {
                     ctx.fillStyle = this.fillStyle;
@@ -473,6 +475,7 @@ function GameEngine(canvas) {
                     var oldRadius = roller.radius;
                     roller.radius = Math.sqrt((roller.area() + item.area()) / tau);
                     if (roller.radius >= milestone) {
+                        lastMilestone = milestone;
                         milestone *= 1.5;
                         scale /= 1.5;
                     }
