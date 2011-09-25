@@ -6,7 +6,8 @@ function GameEngine(canvas) {
         width = parseInt($canvas.attr('width')),
         height = parseInt($canvas.attr('height')),
         ctx = canvas.getContext('2d'),
-        active = false;
+        active = false,
+        horizon = Math.round(height * 0.75);
 
     $.extend(this, {
         start: function() {
@@ -28,9 +29,13 @@ function GameEngine(canvas) {
         paint: function(timestamp) {
             ctx.save();
 
-            ctx.fillStyle = "white";
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(0, 0, width, horizon);
+            
+            ctx.fillStyle = 'green';
+            ctx.fillRect(0, horizon, width, height);
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = "white";
             var x = Math.random() * width,
                 y = Math.random() * height;
             ctx.fillRect(x, y, x + 20, y + 20);
