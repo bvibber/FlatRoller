@@ -90,7 +90,6 @@ function GameEngine(canvas) {
             paint: roller.paint,
             tick: roller.tick
         }));
-        console.log(items[items.length - 1]);
     }
 
     $.extend(this, {
@@ -102,10 +101,14 @@ function GameEngine(canvas) {
 
             // Set up input!
             this.keyboard({
-                // Spacebar
-                32: function(event) {
-                    // @todo reify the simulation time?
+                space: function(event) {
                     roller.dy -= 100;
+                },
+                left: function(event) {
+                    roller.dx -= 10;
+                },
+                right: function(event) {
+                    roller.dx += 10;
                 },
             });
         },
@@ -174,9 +177,20 @@ function GameEngine(canvas) {
         },
         
         keyboard: function(map) {
+            var keys = {
+                space: 32,
+                left: 37,
+                up: 38,
+                left: 39,
+                down: 40
+            };
+            var keyMap = {};
+            $. map(map, function(callback, keyName) {
+                keyMap[keys[keyName]] = callback;
+            });
             $(window).keydown(function(event) {
-                if (event.keyCode in map) {
-                    map[event.keyCode].apply(self, [event]);
+                if (event.keyCode in keyMap) {
+                    keyMap[event.keyCode].apply(self, [event]);
                     event.preventDefault();
                 }
             });
