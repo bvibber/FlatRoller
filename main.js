@@ -374,9 +374,18 @@ $.extend(GameEngine, {
             return window.mozRequestAnimationFrame.bind(window);
         } else if ('webkitRequestAnimationFrame' in window) {
             return window.webkitRequestAnimationFrame.bind(window);
+        } else if ('oRequestAnimationFrame' in window) {
+            return window.oRequestAnimationFrame.bind(window);
+        } else if ('msRequestAnimationFrame' in window) {
+            return window.msRequestAnimationFrame.bind(window);
         } else {
-            return function() {
-                alert('no requestAnimationFrame support');
+            // ewwww!
+            return function(callback) {
+                var idealDelay = 1000 / 60;
+                window.setTimeout(function() {
+                    var timestamp = (new Date()).getTime();
+                    callback(timestamp);
+                }, idealDelay);
             }
         }
     })()
