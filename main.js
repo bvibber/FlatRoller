@@ -79,8 +79,8 @@ $.extend(GameObject.prototype, {
         return (this.radius * this.radius) * 2 * Math.PI;
     },
     mass: function() {
-        // fake it for now
-        return this.area();
+        // fake it for now ;)
+        return (this.radius * this.radius * this.radius) * 3/4 * Math.PI;
     },
     speed: function() {
         return Math.sqrt(this.dx * this.dx + this.dy * this.dy);
@@ -106,8 +106,8 @@ function GameEngine(canvas) {
         lastDebugUpdate = false,
         lastPainted = false,
         lastTicked = false,
-        scale = 2,
-        initialRadius = 20,
+        scale = 4,
+        initialRadius = 10,
         milestone = initialRadius * 1.5;
 
     var roller = new GameObject({
@@ -183,6 +183,14 @@ function GameEngine(canvas) {
     // Add some junk for us eh?
     var objectTypes = [
         {
+            image: 'dog',
+            radius: 3
+        },
+        {
+            image: 'shrub',
+            radius: 5
+        },
+        {
             image: 'car',
             radius: 10
         },
@@ -193,9 +201,22 @@ function GameEngine(canvas) {
         {
             image: 'house',
             radius: 25
+        },
+        {
+            image: 'office',
+            radius: 50
         }
     ], spawnItem = function() {
-        var randomType = objectTypes[Math.floor(Math.random() * objectTypes.length)];
+        var bracketSize = objectTypes.length - 3;
+        var bracket = 0;
+        if (roller.radius > 25) {
+            bracket = 3;
+        } else if (roller.radius > 15) {
+            bracket = 2;
+        } else if (roller.radius > 10) {
+            bracket = 1;
+        }
+        var randomType = objectTypes[bracket + Math.floor(Math.random() * bracketSize)];
         var randomRadius = (1 + Math.random() * 0.25) * randomType.radius;
         var randomX;
         var areaClear = function() {
@@ -207,7 +228,7 @@ function GameEngine(canvas) {
             });
             return isClear;
         };
-        var max = 10, n = 0;
+        var max = 20, n = 0;
         do {
             randomX = Math.random() * width * 3 - width;
             n++;
@@ -233,7 +254,10 @@ function GameEngine(canvas) {
                     'roller',
                     'car',
                     'tree',
-                    'house'
+                    'house',
+                    'dog',
+                    'shrub',
+                    'office'
                 ]
             });
             lib.load(function() {
@@ -265,7 +289,7 @@ function GameEngine(canvas) {
             }, keyMap = {
                 up: function(event) {
                     if (onGround()) {
-                        roller.dy -= Math.sqrt(roller.radius) * 20;
+                        roller.dy -= Math.sqrt(roller.radius) * 30;
                     }
                 },
                 left: function(event) {
