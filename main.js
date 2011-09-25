@@ -81,6 +81,9 @@ $.extend(GameObject.prototype, {
     mass: function() {
         // fake it for now
         return this.area();
+    },
+    speed: function() {
+        return Math.sqrt(this.dx * this.dx + this.dy * this.dy);
     }
 });
 
@@ -392,10 +395,17 @@ function GameEngine(canvas) {
             var distx = item.x - roller.x,
                 disty = item.y - roller.y,
                 dist = Math.sqrt(distx * distx + disty * disty),
-                collision = (dist <= item.radius + roller.radius + margin);
+                direction = (distx) / Math.abs(distx),
+                facing = (roller.dx) / Math.abs(roller.dx),
+                collision = (facing * direction > 0) && (dist <= item.radius + roller.radius + margin);
             if (collision) {
                 if (item.radius + margin >= roller.radius) {
                     // it's bigger than us! collide?
+                    var inertia = roller.mass() * roller.speed(),
+                        transfer = inertia * 0.3333 / item.mass(),
+                        bounceback = inertia * 0.3333 / roller.mass();
+                    item.dx += direction * transfer;
+                    roller.dx = -direction * bounceback;
                 } else {
                     // it's smaller than us! swallow it
                     roller.radius = Math.sqrt((roller.area() + item.area()) / tau);
