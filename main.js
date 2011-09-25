@@ -108,7 +108,8 @@ function GameEngine(canvas) {
         lastTicked = false,
         scale = 4,
         initialRadius = 10,
-        milestone = initialRadius * 1.5;
+        milestone = initialRadius * 1.5,
+        scalehack = 0.75; // for the rollup image, needs to be bigger than the raw roller
 
     var roller = new GameObject({
         x: 100,
@@ -134,6 +135,11 @@ function GameEngine(canvas) {
                 }
                 ctx.fillRect(-this.radius, -this.radius,
                              this.radius * 2, this.radius * 2);
+            }
+            if ('overlay' in this) {
+                ctx.drawImage(this.overlay,
+                              -this.radius / scalehack, -this.radius / scalehack,
+                              this.radius * 2 / scalehack, this.radius * 2 / scalehack);
             }
             ctx.restore();
         },
@@ -463,14 +469,55 @@ function GameEngine(canvas) {
                     roller.dx = -direction * bounceback;
                 } else {
                     // it's smaller than us! swallow it
+                    var oldRadius = roller.radius;
                     roller.radius = Math.sqrt((roller.area() + item.area()) / tau);
                     if (roller.radius >= milestone) {
                         milestone *= 1.5;
                         scale /= 1.5;
                     }
+                    self.addToRollup(item, oldRadius, roller.radius);
                     item.active = false;
                 }
             }
+        },
+
+        addToRollup: function(item, oldRadius, newRadius) {
+            var overlay = $('<canvas>').attr('width', 256).attr('height', 256)[0],
+                ctx = overlay.getContext('2d');
+            ctx.save();
+            ctx.translate(128, 128);
+            ctx.scale(128 / newRadius, 128 / newRadius);
+            ctx.scale(scalehack, scalehack);
+
+            if (roller.overlay) {
+                ctx.save();
+                ctx.drawImage(roller.overlay,
+                              -oldRadius / scalehack, -oldRadius / scalehack,
+                              oldRadius * 2 / scalehack, oldRadius * 2 / scalehack);
+                ctx.restore();
+            }
+
+            // Correct for the current roller rotation
+            ctx.rotate(-roller.theta);
+            
+            var distx = (item.x - roller.x);
+            var direction = (distx < 0) ? -1 : 1;
+
+            ctx.drawImage(images[item.image],
+                          direction * (newRadius - item.radius * 0.5) - item.radius, -item.radius,
+                          item.radius * 2, item.radius * 2);
+            ctx.restore();
+            roller.overlay = overlay;
+
+            /**
+            // for debug
+            $('#overlay').remove();
+            $(overlay).attr('id', 'overlay').css({
+                'z-index': 100,
+                'position': 'absolute',
+                'border': 'solid 1px gray'
+            }).appendTo('body');
+            */
         },
 
         keyboard: function(map) {
