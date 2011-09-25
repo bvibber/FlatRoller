@@ -66,12 +66,23 @@ function GameObject(props) {
         dx: 0,
         dy: 0,
         dtheta: 0,
+        active: true,
         paint: null,
         tick: null
     };
     $.extend(defaults, props);
     $.extend(this, defaults);
 }
+
+$.extend(GameObject.prototype, {
+    area: function() {
+        return (this.radius * this.radius) * 2 * Math.PI;
+    },
+    mass: function() {
+        // fake it for now
+        return this.area();
+    }
+});
 
 function GameEngine(canvas) {
     var self = this,
@@ -335,10 +346,36 @@ function GameEngine(canvas) {
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
                 item.tick.apply(item, args);
+                if (item !== roller) {
+                    self.rollupCheck(item);
+                }
+            }
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                if (!item.active) {
+                    items.splice(i, 1);
+                    i--;
+                }
             }
             tickCount++;
         },
-        
+
+        rollupCheck: function(item) {
+            var distx = item.x - roller.x,
+                disty = item.y - roller.y,
+                dist = Math.sqrt(distx * distx + disty * disty),
+                collision = (dist <= item.radius + roller.radius + margin);
+            if (collision) {
+                if (item.radius + margin >= roller.radius) {
+                    // it's bigger than us! collide?
+                } else {
+                    // it's smaller than us! swallow it
+                    roller.radius = Math.sqrt((roller.area() + item.area()) / tau);
+                    item.active = false;
+                }
+            }
+        },
+
         keyboard: function(map) {
             var keys = {
                 space: 32,
