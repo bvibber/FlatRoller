@@ -310,6 +310,14 @@ function GameEngine(canvas) {
                 }
             }, 100);
 
+            // Size canvas to fit the whole window
+            $(window).resize(function() {
+                // Reinitialize the canvas!
+                $canvas
+                    .attr('width', $(window).width())
+                    .attr('height', $(window).height());
+            }).resize();
+
             // Set up input!
             var onGround = function() {
                 return roller.y + roller.radius > -2 * margin;
@@ -406,6 +414,9 @@ function GameEngine(canvas) {
         paint: function(timestamp) {
             ctx.save();
 
+            // Size to our virtual viewport
+            ctx.scale(parseInt($canvas.attr('width')) / width,
+                      parseInt($canvas.attr('height')) / height);
             ctx.fillStyle = 'blue';
             ctx.fillRect(0, 0, width, horizon);
             
