@@ -449,16 +449,25 @@ function GameEngine(canvas) {
             ctx.save();
 
             // Size to our virtual viewport
-            ctx.scale(parseInt($canvas.attr('width')) / width,
-                      parseInt($canvas.attr('height')) / height);
+            var physicalWidth = parseInt($canvas.attr('width')),
+                physicalHeight = parseInt($canvas.attr('height')),
+                virtualWidth = width,
+                virtualHeight = physicalHeight / physicalWidth * virtualWidth;
+            // Fix aspect ratio so our standard width always fits
+            ctx.scale(physicalWidth / virtualWidth, physicalHeight / virtualHeight);
+            
+            // Adjust horizon
+            //var physicalHorizon = (horizon / height) * virtualHeight;
+            var physicalHorizon = horizon * virtualHeight / height;
+
             ctx.fillStyle = 'blue';
-            ctx.fillRect(0, 0, width, horizon);
+            ctx.fillRect(0, 0, width, physicalHorizon);
             
             ctx.fillStyle = 'green';
-            ctx.fillRect(0, horizon, width, height - horizon);
+            ctx.fillRect(0, physicalHorizon, width, virtualHeight - physicalHorizon);
 
             // Scale & position horizon
-            ctx.translate(width / 2, horizon);
+            ctx.translate(width / 2, physicalHorizon);
             ctx.scale(scale, scale);
             // Center the view on our roller
             ctx.translate(-roller.x, 0);
