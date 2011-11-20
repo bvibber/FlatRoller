@@ -353,17 +353,17 @@ function GameEngine(canvas) {
                 var dirKeysDownCount = 0;
                 var toggleHelp = function(target, opposite) {
                     if (dirKeysDownCount == 2) {
-                        $('.help-jump').show();
                         $('.help-move').hide();
+                        $('.help-jump').show();
                     } else if (dirKeysDownCount == 1) {
                         $(opposite).find('.help-move').hide();
                         $(target).find('.help-move').show();
 
-                        $(opposite).find('.help-jump').show();
                         $(target).find('.help-jump').hide();
+                        $(opposite).find('.help-jump').show();
                     } else {
-                        $('.help-move').show();
                         $('.help-jump').hide();
+                        $('.help-move').show();
                     }
                 };
                 var touchableArea = function(target, opposite, callback) {
