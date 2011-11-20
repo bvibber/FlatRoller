@@ -351,7 +351,22 @@ function GameEngine(canvas) {
             if (true) {
                 var repeatDelay = 100;
                 var dirKeysDownCount = 0;
-                var touchableArea = function(target, callback) {
+                var toggleHelp = function(target, opposite) {
+                    if (dirKeysDownCount == 2) {
+                        $('.help-jump').show();
+                        $('.help-move').hide();
+                    } else if (dirKeysDownCount == 1) {
+                        $(opposite).find('.help-move').hide();
+                        $(target).find('.help-move').show();
+
+                        $(opposite).find('.help-jump').show();
+                        $(target).find('.help-jump').hide();
+                    } else {
+                        $('.help-move').show();
+                        $('.help-jump').hide();
+                    }
+                };
+                var touchableArea = function(target, opposite, callback) {
                     var interval,
                         msPointer = (typeof window.navigator.msPointerEnabled !== 'undefined') && window.navigator.msPointerEnabled,
                         downEvent = (msPointer ? 'MSPointerDown' : 'touchstart'),
@@ -368,6 +383,8 @@ function GameEngine(canvas) {
                             dirKeysDownCount++;
                             keyMap.right();
                             interval = window.setInterval(callback, repeatDelay);
+                            $(target).addClass('active');
+                            toggleHelp(target, opposite);
                         }
                         return false;
                     }).bind(upEvent, function(event) {
@@ -376,6 +393,8 @@ function GameEngine(canvas) {
                             dirKeysDownCount--;
                             window.clearInterval(interval);
                             interval = null;
+                            $(target).removeClass('active');
+                            toggleHelp(opposite, target);
                         }
                         return false;
                     }).bind(moveEvent, function(event) {
@@ -389,8 +408,8 @@ function GameEngine(canvas) {
                         event.preventDefault();
                     });
                 };
-                touchableArea('#touch-left', keyMap.left);
-                touchableArea('#touch-right', keyMap.right);
+                touchableArea('#touch-left', '#touch-right', keyMap.left);
+                touchableArea('#touch-right', '#touch-left', keyMap.right);
             }
         },
 

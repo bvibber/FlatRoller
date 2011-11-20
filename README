@@ -10,6 +10,12 @@
 * touch events work one at a time
 * multitouch jump doesn't seem to work reliably
 
+== Firefox 10 / Kindle Fire / Android 2.3 ==
+
+* Verrrry sluggish; reports around 8-10fps.
+* touch events work one at a time
+* multitouch jump doesn't seem to work
+
 
 == IE 10 / Win 8 DP ==
 

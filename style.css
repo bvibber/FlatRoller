@@ -4,6 +4,8 @@ body {
 
     overflow: hidden;
     -ms-content-zooming: none; /* disable touch pan/zoom in IE 10 */
+    
+    font-family: 'Helvetica', 'Arial', sans-serif;
 }
 
 #all {
@@ -37,14 +39,22 @@ body {
     top: 40px;
     bottom: 40px;
     width: 192px;
+    background: rgba(0, 0, 0, 0.1);
+    
+    text-align: center;
+    padding-top: 20%;
+    font-size: 32px;
+}
+#touch-left.active,
+#touch-right.active {
+    background: rgba(0, 0, 0, 0.2);
 }
 #touch-left {
     left: 0px;
-    background: rgb(24, 0, 0);
-    opacity: 0.1;
 }
 #touch-right {
     right: 0px;
-    background: rgb(24, 24, 0);
-    opacity: 0.1;
+}
+.help-jump {
+    display: none;
 }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta type="http-equiv" content="Content-Type: text/html; charset=utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta name="viewport" content="user-scalable=no, width=device-height">
         <title>FlatRoller</title>
         <link rel="stylesheet" type="text/css" href="style.css">
@@ -11,8 +11,24 @@
     <body>
         <canvas id="game" width="640" height="360"></canvas>
         <div id="all">
-            <div id="touch-left">&nbsp;</div>
-            <div id="touch-right">&nbsp;</div>
+            <div id="controls">
+                <div id="touch-left">
+                    <div class="help-move">
+                        ⇦&nbsp;Left
+                    </div>
+                    <div class="help-jump">
+                        ⇧&nbsp;Jump
+                    </div>
+                </div>
+            </div>
+            <div id="touch-right">
+                <div class="help-move">
+                    Right&nbsp;⇨
+                </div>
+                <div class="help-jump">
+                    Jump&nbsp;⇧
+                </div>
+            </div>
             <div id="ui">
                 <h1>FlatRoller canvas game demo</h1>
                 <p>
