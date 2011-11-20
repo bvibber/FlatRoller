@@ -352,8 +352,12 @@ function GameEngine(canvas) {
                 var repeatDelay = 100;
                 var dirKeysDownCount = 0;
                 var touchableArea = function(target, callback) {
-                    var interval;
-                    $(target).bind('touchstart', function(event) {
+                    var interval,
+                        msPointer = (typeof window.navigator.msPointerEnabled !== 'undefined') && window.navigator.msPointerEnabled,
+                        downEvent = (msPointer ? 'MSPointerDown' : 'touchstart'),
+                        upEvent = (msPointer ? 'MSPointerUp' : 'touchend');
+                        moveEvent = (msPointer ? 'MSPointerMove' : 'touchmove');
+                     $(target).bind(downEvent, function(event) {
                         event.preventDefault();
                         if (!interval) {
                             if (dirKeysDownCount) {
@@ -365,13 +369,24 @@ function GameEngine(canvas) {
                             keyMap.right();
                             interval = window.setInterval(callback, repeatDelay);
                         }
-                    }).bind('touchend', function(event) {
+                        return false;
+                    }).bind(upEvent, function(event) {
                         event.preventDefault();
                         if (interval) {
                             dirKeysDownCount--;
                             window.clearInterval(interval);
                             interval = null;
                         }
+                        return false;
+                    }).bind(moveEvent, function(event) {
+                        // Keep zoom, context menu from showing in IE 10
+                        event.preventDefault();
+                    }).bind('MSGestureHold', function(event) {
+                        // Disable visual effect for long-hold context menu on IE 10
+                        event.preventDefault();
+                    }).bind('contextmenu', function(event) {
+                        // Disable long-hold context menu on IE 10
+                        event.preventDefault();
                     });
                 };
                 touchableArea('#touch-left', keyMap.left);

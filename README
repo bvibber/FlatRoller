@@ -1,0 +1,21 @@
+== Safari / iPad / iOS 5 ==
+
+* Feels a bit slussish, but reports 40s-50s fps
+* aspect ratio needs fixing
+* touch ok
+
+== Silk / Kindle Fire / Android 2.3 ==
+
+* Feels very sluggish; reports 25-30 fps generally
+* touch events work one at a time
+* multitouch jump doesn't seem to work reliably
+
+
+== IE 10 / Win 8 DP ==
+
+Canvas renders nicely. Seems to (should) use requestAnimationFrame
+keyboard ok
+
+* using MSPointer touch events model: http://blogs.msdn.com/b/ie/archive/2011/09/20/touch-input-for-ie10-and-metro-style-apps.aspx
+* also need to disable context menu stuff per http://msdn.microsoft.com/en-us/ie/hh272903 "Common practices for touch optimization"
+

@@ -1,6 +1,9 @@
 body {
     background: black;
     color: white;
+
+    overflow: hidden;
+    -ms-content-zooming: none; /* disable touch pan/zoom in IE 10 */
 }
 
 #all {
